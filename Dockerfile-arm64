@@ -1,0 +1,14 @@
+FROM golang AS builder
+RUN apt-get update
+
+WORKDIR /usr/src/
+
+COPY go.mod main.go ./
+
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o app -a -ldflags '-extldflags "-static"'
+
+FROM arm64v8/amazonlinux
+
+WORKDIR /
+COPY --from=builder /usr/src/app .
+CMD ["/app"]
